@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .env
+
+# third-party paper PDFs: kept locally, not redistributed
+related_papers/**/*.pdf
