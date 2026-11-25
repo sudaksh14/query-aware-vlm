@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "hydram3-vlm"
 version = "0.1.0"
 description = "Joint visual-token (M3) and LLM-width (HydraLLM) budgets in one VLM inference pipeline"
-readme = "README.md"
 requires-python = ">=3.10"
 # Core: budget logic, M3 pooling, orchestration and mocked tests.
 dependencies = ["torch>=2.1", "pyyaml", "pillow"]

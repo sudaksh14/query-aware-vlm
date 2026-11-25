@@ -1,4 +1,21 @@
-# hydram3-vlm
+# query-aware-vlm
+
+Research code for query-aware elastic vision-language models: choosing, per query, how many visual tokens
+and how much LLM width to spend. One git repository holds everything:
+
+| Path | Contents |
+|---|---|
+| [`docs/`](docs) | Research plan (`query_aware_elastic_vlm_research_plan.md/.pdf`) and pipeline diagram |
+| [`related_papers/`](related_papers) | `papers_summary_and_comparison.md` (paper PDFs are kept locally only, not committed) |
+| [`hydram3-vlm/`](hydram3-vlm) | **The integration package** documented below |
+| [`hydrallm/`](hydrallm) | Unmodified copy of [HydraLLM](https://github.com/tuhh-ncps/hydrallm) (Apache-2.0) |
+| [`matryoshka-mm/`](matryoshka-mm) | Unmodified copy of [M3](https://github.com/mu-cai/matryoshka-mm) (Apache-2.0) |
+| [`NOTICE`](NOTICE) | Attribution for the upstream code |
+
+`hydrallm/` and `matryoshka-mm/` are plain directories (no nested git repositories or submodules); their
+upstream revisions are recorded in `NOTICE`.
+
+## hydram3-vlm
 
 One inference path that combines **M3** visual-token budgets with **HydraLLM** LLM-width budgets, plus a
 stable extension point for the **Query Budget Selection Module (QBSM)** that will choose the pair
@@ -12,9 +29,9 @@ stable extension point for the **Query Budget Selection Module (QBSM)** that wil
 
 | Component | Responsibility |
 |---|---|
-| **M3** ([`../matryoshka-mm`](../matryoshka-mm)) | The token mechanism: nested 2D average pooling of the projected visual-token grid (`matryoshka_vis_token_process`). |
-| **HydraLLM** ([`../hydrallm`](../hydrallm)) | The model: multimodal HydraGemma 3 (SigLIP encoder, width-following projector, width-elastic Gemma 3 decoder) and its `generate`. |
-| **This repo** | Orchestration, budget validation/resolution, adapters that apply `N` and `W` to HydraLLM without editing it, measured metadata, tests. |
+| **M3** ([`matryoshka-mm/`](matryoshka-mm)) | The token mechanism: nested 2D average pooling of the projected visual-token grid (`matryoshka_vis_token_process`). |
+| **HydraLLM** ([`hydrallm/`](hydrallm)) | The model: multimodal HydraGemma 3 (SigLIP encoder, width-following projector, width-elastic Gemma 3 decoder) and its `generate`. |
+| **hydram3-vlm** ([`hydram3-vlm/`](hydram3-vlm)) | Orchestration, budget validation/resolution, adapters that apply `N` and `W` to HydraLLM without editing it, measured metadata, tests. |
 | **QBSM (future, student)** | A predictor that maps the request (image, prompt, encoder features) to `(N, W)`. Plugs into `QBSMBudgetProviderAdapter`. |
 
 **What it does now.** Takes one image and one prompt, gets `(N, W)` from a budget provider, runs HydraLLM's
@@ -28,7 +45,7 @@ SigLIP encoder once, pools HydraLLM's visual tokens to `N` with M3's operation, 
   HydraLLM's own visual tokens.
 - Guarantee quality below 256 visual tokens. M3 works because the LLM is *trained* on pooled tokens;
   HydraLLM's multimodal checkpoints are not. Producing a checkpoint trained on both axes is the Phase-1
-  elastic fine-tune in the research plan ([`../docs`](../docs)).
+  elastic fine-tune in the research plan ([`docs/`](docs)).
 - Batching (one request at a time), multiple images per prompt, pan-and-scan crops, Phase 2 (elastic vision
   encoder), MatFormer FFN-only width.
 
@@ -73,9 +90,9 @@ How the values reach each upstream component, without modifying either repositor
 ## 3. Repository layout
 
 ```text
+README.md                       this file (repository root)
+NOTICE                          upstream attribution (repository root)
 hydram3-vlm/
-  README.md                     this file
-  NOTICE                        upstream attribution
   pyproject.toml                package metadata, extras: hydra (real inference), dev (tests)
   configs/
     hydra_gemma3_270m_mm.yaml   example config with the operating points found in the upstream code
@@ -93,12 +110,12 @@ hydram3-vlm/
 
 ## 4. Prerequisites and setup
 
-### Upstream sources (in this workspace)
+### Upstream sources (in this repository)
 
 | Upstream | Path | Revision | License | Packaging |
 |---|---|---|---|---|
-| HydraLLM | `../hydrallm` | `tuhh-ncps/hydrallm@64c15ff` | Apache-2.0 | Not a package. Used from the checkout: the adapter puts the repo root on `sys.path` (`hydrallm.repo_path`). |
-| M3 | `../matryoshka-mm` | `mu-cai/matryoshka-mm@ec30cd3` | Apache-2.0 | `pip install -e .` gives package `llava`, but it pins `torch==2.1.2`, `transformers==4.36.2`. **Not installed or imported**; its ~10-line pooling op is ported in `adapters/m3.py`. |
+| HydraLLM | `hydrallm/` | `tuhh-ncps/hydrallm@64c15ff` | Apache-2.0 | Not a package. Used from the checkout: the adapter puts the repo root on `sys.path` (`hydrallm.repo_path`). |
+| M3 | `matryoshka-mm/` | `mu-cai/matryoshka-mm@ec30cd3` | Apache-2.0 | `pip install -e .` gives package `llava`, but it pins `torch==2.1.2`, `transformers==4.36.2`. **Not installed or imported**; its ~10-line pooling op is ported in `adapters/m3.py`. |
 
 Why not install both: HydraLLM needs torch 2.8 / transformers 4.56 (Gemma 3 support); M3's `llava` pins
 torch 2.1.2 / transformers 4.36.2. They cannot share one environment. Use **one environment built for
@@ -113,7 +130,7 @@ Verified on Windows 11, CPU only, Python 3.11, `torch==2.8.0+cpu`, `transformers
 `accelerate==1.10.1` (HydraLLM's pins). Not yet run on GPU or with a real checkpoint.
 
 ```bash
-cd hydram3-vlm
+cd hydram3-vlm                                # from the repository root
 python3.11 -m venv .venv
 source .venv/bin/activate                     # Windows: .venv\Scripts\activate
 pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu   # or the CUDA build you need
@@ -127,7 +144,7 @@ A multimodal HydraGemma checkpoint. HydraLLM documents how to build one (downloa
 require accepting the Gemma terms on Hugging Face):
 
 ```bash
-cd ../hydrallm
+cd hydrallm                                   # from the repository root
 python util/create_mm_hydra_gemma.py \
   --text-model google/gemma-3-270m \
   --mm-source google/gemma-3-4b-pt \
@@ -141,7 +158,8 @@ meaningful. On a GPU, install the CUDA build of torch 2.8.0 matching your driver
 
 ## 5. Configuration
 
-`configs/hydra_gemma3_270m_mm.yaml`. Relative paths resolve against the YAML's directory; `${VAR}` and `~`
+`hydram3-vlm/configs/hydra_gemma3_270m_mm.yaml`. Relative paths resolve against the YAML's directory (so
+`../../hydrallm` is the repository's `hydrallm/`); `${VAR}` and `~`
 are expanded; unknown keys are rejected.
 
 ```yaml
@@ -183,6 +201,8 @@ fraction. For `k` heads of `H`, HydraLLM uses embedding/projector width `int(hid
 out-of-range head counts; this repo rejects them instead.
 
 ## 6. Running
+
+Commands and paths in this section are relative to `hydram3-vlm/`.
 
 Python API:
 
@@ -316,6 +336,7 @@ Its compute time is reported in the `budget_decision` stage.
 ## 8. Testing
 
 ```bash
+cd hydram3-vlm                              # from the repository root
 python -m pytest -q                         # everything available; optional suites skip cleanly
 python -m pytest -q -m "not hydrallm"       # pure unit tests: torch + pyyaml only
 python -m pytest -q -m hydrallm             # HydraLLM's real model classes, tiny random config, CPU
@@ -330,7 +351,7 @@ mypy
 | `test_m3_pooling.py` | nested points, block-mean pooling in raster order, nesting, M3 formula off-grid | torch |
 | `test_pipeline_with_mocks.py` | stage order, values reaching the backend, metadata, error stages, sync flags, token-count mismatch refusal | torch |
 | `test_config.py` | example config loads, env expansion, unknown keys, QBSM factory import | pyyaml |
-| `test_hydra_adapter_tiny.py` | **smoke test** on HydraLLM's `HydraGemma3ForConditionalGeneration` with a tiny random config (no download): full-budget output identical to plain HydraLLM `generate`; reduced budgets give `N` tokens at the expected width; hooked features equal M3 pooling of HydraLLM's projector output; encoder runs once; hook and stub removed | transformers 4.56, HydraLLM checkout (`HYDRALLM_REPO` to override `../hydrallm`) |
+| `test_hydra_adapter_tiny.py` | **smoke test** on HydraLLM's `HydraGemma3ForConditionalGeneration` with a tiny random config (no download): full-budget output identical to plain HydraLLM `generate`; reduced budgets give `N` tokens at the expected width; hooked features equal M3 pooling of HydraLLM's projector output; encoder runs once; hook and stub removed | transformers 4.56, HydraLLM checkout (default: the repository's `hydrallm/`; override with `HYDRALLM_REPO`) |
 | `test_m3_upstream_parity.py` | `matryoshka_pool` equals M3's `matryoshka_vis_token_process` (24x24 and 16x16 grids) | `llava` importable; `PYTHONPATH=../matryoshka-mm` works in the HydraLLM environment (verified with transformers 4.56.1); skipped otherwise |
 | `test_checkpoint_integration.py` | real checkpoint, extreme operating points | `HYDRAM3_CONFIG`, `HYDRAM3_TEST_IMAGE`; skipped otherwise |
 
@@ -394,4 +415,5 @@ Upstream projects (both Apache-2.0; licenses in their directories):
   Vision-Language Models.* BabyLM 2026. https://github.com/tuhh-ncps/hydrallm, https://arxiv.org/abs/2610.23455.
   Used unmodified.
 
-This repository has no license file yet; choose one before distributing it separately.
+The repository has no license of its own yet (only the upstream Apache-2.0 licenses in `hydrallm/` and
+`matryoshka-mm/`, summarised in `NOTICE`); choose one for `hydram3-vlm/`, `docs/` and `related_papers/`.

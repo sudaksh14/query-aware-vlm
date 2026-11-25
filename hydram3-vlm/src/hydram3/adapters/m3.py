@@ -1,7 +1,7 @@
 # Portions adapted from matryoshka-mm (M3), llava/model/llava_arch.py,
 # LlavaMetaForCausalLM.matryoshka_vis_token_process.
 #   Copyright 2023 Haotian Liu; M3 modifications by Mu Cai et al.
-#   Licensed under the Apache License, Version 2.0. See ../../../NOTICE.
+#   Licensed under the Apache License, Version 2.0. See NOTICE at the repository root.
 # The operation is re-implemented here (instead of imported) because the `llava` package pins
 # torch==2.1.2 / transformers==4.36.2, which conflict with HydraLLM's torch 2.8 / transformers 4.56.
 # tests/test_m3_upstream_parity.py checks numerical equality against the upstream function

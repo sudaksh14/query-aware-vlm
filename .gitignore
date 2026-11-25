@@ -1,9 +1,26 @@
+# Python / tooling
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .ipynb_checkpoints/
+.venv/
+build/
+dist/
+
+# OS / secrets
 .DS_Store
 Thumbs.db
 .env
+
+# never commit weights or run outputs
+*.safetensors
+*.bin
+*.pt
+*.pth
+outputs/
 
 # third-party paper PDFs: kept locally, not redistributed
 related_papers/**/*.pdf

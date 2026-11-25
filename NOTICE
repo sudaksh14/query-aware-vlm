@@ -1,0 +1,19 @@
+query-aware-vlm contains two upstream projects, copied unmodified into their own directories, and
+the integration package hydram3-vlm/. Both upstream projects are licensed under the Apache License
+2.0; their license and notice files are kept unchanged in their directories.
+
+1. M3: Matryoshka Multimodal Models (matryoshka-mm/)
+   https://github.com/mu-cai/matryoshka-mm  (revision ec30cd3)
+   Cai, Yang, Gao, Lee. ICLR 2025. Based on LLaVA, Copyright 2023 Haotian Liu.
+   hydram3-vlm/src/hydram3/adapters/m3.py re-implements
+   LlavaMetaForCausalLM.matryoshka_vis_token_process from llava/model/llava_arch.py (Apache-2.0).
+   License: matryoshka-mm/LICENSE
+
+2. HydraLLM (hydrallm/)
+   https://github.com/tuhh-ncps/hydrallm  (revision 64c15ff)
+   Kemme, Haberer, Hojjat, Landsiedel. BabyLM workshop 2026.
+   hydram3-vlm uses it unmodified from its directory; no source copied into hydram3-vlm.
+   License and NOTICE: hydrallm/LICENSE, hydrallm/NOTICE
+
+Model weights, tokenizers and datasets used with this code remain under their own licenses
+(e.g. the Gemma terms of use for Gemma 3 checkpoints).
