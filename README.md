@@ -415,5 +415,10 @@ Upstream projects (both Apache-2.0; licenses in their directories):
   Vision-Language Models.* BabyLM 2026. https://github.com/tuhh-ncps/hydrallm, https://arxiv.org/abs/2610.23455.
   Used unmodified.
 
-The repository has no license of its own yet (only the upstream Apache-2.0 licenses in `hydrallm/` and
-`matryoshka-mm/`, summarised in `NOTICE`); choose one for `hydram3-vlm/`, `docs/` and `related_papers/`.
+## License
+
+The original work in this repository (`hydram3-vlm/`, `docs/`, and the repository's own text such as this
+README) is licensed under the Apache License 2.0; see [`LICENSE`](LICENSE). The copies of HydraLLM
+(`hydrallm/`) and M3 (`matryoshka-mm/`) keep their own Apache-2.0 `LICENSE` and `NOTICE` files; see
+[`NOTICE`](NOTICE) for attribution. Third-party papers summarised in `related_papers/` and any model weights
+or datasets remain under their own terms.

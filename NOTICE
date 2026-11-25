@@ -1,6 +1,7 @@
 query-aware-vlm contains two upstream projects, copied unmodified into their own directories, and
-the integration package hydram3-vlm/. Both upstream projects are licensed under the Apache License
-2.0; their license and notice files are kept unchanged in their directories.
+the integration package hydram3-vlm/. The repository's own work is licensed under the Apache License
+2.0 (see LICENSE). Both upstream projects are also licensed under the Apache License 2.0; their
+license and notice files are kept unchanged in their directories.
 
 1. M3: Matryoshka Multimodal Models (matryoshka-mm/)
    https://github.com/mu-cai/matryoshka-mm  (revision ec30cd3)
