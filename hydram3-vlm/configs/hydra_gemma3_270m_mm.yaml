@@ -1,0 +1,29 @@
+# Multimodal HydraGemma 3 (270M text model + Gemma 3 SigLIP tower/projector) with M3 pooling.
+# Relative paths resolve against this file's directory; ${VAR} and ~ are expanded.
+hydrallm:
+  repo_path: ../../hydrallm            # HydraLLM checkout (not pip-installed)
+  # REQUIRED. Output of hydrallm/util/create_mm_hydra_gemma.py, ideally after train_unified.py.
+  model_path: ${HYDRAM3_MODEL_PATH}
+  processor_path: null                 # null = load processor from model_path
+  device: cuda                         # cuda | cuda:0 | cpu
+  dtype: auto                          # auto (bf16 on CUDA, fp32 on CPU) | bfloat16 | float16 | float32
+  attn_implementation: auto            # auto | sdpa | eager | flash_attention_2
+
+budget:
+  # Exact nested M3 points of HydraLLM's 16x16 visual-token grid (mm_tokens_per_image: 256).
+  supported_visual_tokens: [1, 4, 16, 64, 256]
+  # HydraLLM active heads; gemma-3-270m has 4 heads and the Hydra recipes train [1, 2, 3, 4].
+  supported_widths: [1, 2, 3, 4]
+  provider: fixed                      # fixed | qbsm
+  fixed_visual_tokens: 256
+  fixed_width: 4
+  # provider: qbsm
+  # qbsm_factory: my_qbsm.predictor:build   # returns an object with predict(QBSMInputs) -> (N, W)
+  # qbsm_kwargs: {checkpoint: /path/to/qbsm.pt}
+
+generation:
+  max_new_tokens: 64
+  do_sample: false
+
+prompt_template: "<start_of_image>\n{prompt}"
+image_placeholder: "<start_of_image>"

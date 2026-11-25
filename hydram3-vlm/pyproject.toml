@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hydram3-vlm"
+version = "0.1.0"
+description = "Joint visual-token (M3) and LLM-width (HydraLLM) budgets in one VLM inference pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+# Core: budget logic, M3 pooling, orchestration and mocked tests.
+dependencies = ["torch>=2.1", "pyyaml", "pillow"]
+
+[project.optional-dependencies]
+# Real inference through HydraLLM. Pins copied from hydrallm/requirements.txt (the stack it is
+# developed against); hydrallm itself is used from its checkout, not installed.
+hydra = [
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "transformers==4.56.1",
+    "accelerate==1.10.1",
+    "numpy",
+]
+dev = ["pytest>=8", "ruff", "mypy"]
+
+[project.scripts]
+hydram3 = "hydram3.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "hydrallm: uses HydraLLM's real model code (needs transformers; no weights downloaded)",
+    "checkpoint: needs a real multimodal HydraGemma checkpoint (HYDRAM3_CONFIG)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["UP007", "UP006", "UP035", "UP045"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+files = ["src/hydram3"]
