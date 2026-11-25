@@ -1,0 +1,6 @@
+[submodule "hydrallm"]
+	path = hydrallm
+	url = https://github.com/tuhh-ncps/hydrallm.git
+[submodule "matryoshka-mm"]
+	path = matryoshka-mm
+	url = https://github.com/mu-cai/matryoshka-mm.git
